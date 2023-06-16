@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Input, Space, Spin, Button } from "antd";
-import { AudioOutlined } from "@ant-design/icons";
-import ReactStars from "react-rating-stars-component";
 import Footer from "./Footer";
 import "../products.css";
+import ReactStars from "react-rating-stars-component";
+import { Input, Space, Spin, Button } from "antd";
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -12,6 +11,7 @@ function Products() {
   const [records, setRecords] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchValue, setSearchValue] = useState("");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     axios
@@ -22,7 +22,10 @@ function Products() {
         setLoading(false);
         setFilteredProducts(res.data.products);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        setError(err); // Set the error state
+        setLoading(false);
+      });
   }, []);
 
   const handleProductClick = (productId) => {
@@ -30,7 +33,6 @@ function Products() {
   };
 
   const getInputData = (event) => {
-    setSearchValue(event.target.value);
     setFilteredProducts(
       records.filter((r) =>
         r.title.toLowerCase().includes(event.target.value.toLowerCase())
@@ -46,6 +48,10 @@ function Products() {
     );
   };
 
+  if (error) {
+    return <div>Error: {error.message}</div>; // Display the error message
+  }
+
   return (
     <div className="product-container">
       <h2>Product Reviews</h2>
@@ -56,7 +62,6 @@ function Products() {
           Search
         </Button>
       </Space>
-
       <div className="products">
         {loading ? (
           <div className="Loading">
@@ -85,7 +90,6 @@ function Products() {
           ))
         )}
       </div>
-
       <Footer />
     </div>
   );
